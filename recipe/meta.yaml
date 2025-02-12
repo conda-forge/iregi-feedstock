@@ -49,6 +49,7 @@ outputs:
         - {{ compiler('fortran') }}
         - make
         - libtool
+        - oneloop-static  # [build_platform != target_platform]
       host:
         - oneloop-static
 
