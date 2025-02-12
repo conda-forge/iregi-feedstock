@@ -15,7 +15,7 @@ source:
       - use-avh_olo.patch
 
 build:
-  number: 1
+  number: 2
 
 outputs:
   - name: {{ name }}-static
@@ -49,8 +49,9 @@ outputs:
         - {{ compiler('fortran') }}
         - make
         - libtool
+        - oneloop-static  # [build_platform != target_platform]
       host:
-        - oneloop
+        - oneloop-static
 
     test:
       commands:
