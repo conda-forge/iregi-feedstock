@@ -1,9 +1,12 @@
-{% set name = "iregi" %}
-{% set version = "1.1.0" %}
+schema_version: 1
 
-package:
-  name: {{ name }}
-  version: {{ version }}
+context:
+  name: iregi
+  version: 1.1.0
+
+recipe:
+  name: ${{ name }}
+  version: ${{ version }}
 
 source:
   - url: https://github.com/hep-packaging-coordination/mg5amcnlo-release-mirror/releases/download/3.5.7/MG5_aMC_v3.5.7.tar.gz
@@ -15,68 +18,63 @@ source:
       - use-avh_olo.patch
 
 build:
-  number: 2
+  number: 3
 
 outputs:
-  - name: {{ name }}-static
-
+  - package:
+      name: ${{ name }}-static
     build:
-      skip: true  # [win]
+      skip: win
       script:
         - cd vendor/IREGI/src/
-
         # Remove vendored code that is on conda-forge
         - rm -rf oneloop
         - rm -rf qcdloop
         - rm makefile
         - rm makefile_oneloop
         - rm makefile_qcdloop
-
         # Build
         # Enable extended-source with '-ffixed-line-length-none' for long lines
         # c.f. https://gcc.gnu.org/onlinedocs/gfortran/Fortran-Dialect-Options.html#index-ffixed-line-length-n
         # The build is not parallel safe, so must compile single threaded
         - make -f makefile_ML5_lib FC=$FC FFLAGS="$FFLAGS -std=legacy -Wall -ffixed-line-length-none -I$PREFIX/include/oneloop"
-
         # Install
         - mv libiregi.a $PREFIX/lib/
         - mkdir -p $PREFIX/include/iregi
         - mv *.mod $PREFIX/include/iregi/
-
     requirements:
       build:
-        - {{ stdlib('c') }}
-        - {{ compiler('fortran') }}
+        - ${{ stdlib('c') }}
+        - ${{ compiler('fortran') }}
         - make
         - libtool
-        - oneloop-static  # [build_platform != target_platform]
+        - if: build_platform != target_platform
+          then: oneloop-static
       host:
         - oneloop-static
-
-    test:
-      commands:
-        - test -f $PREFIX/lib/libiregi.a
-        - test -f $PREFIX/include/iregi/binary_tree.mod
-        - test -f $PREFIX/include/iregi/cmatrix_base.mod
-        - test -f $PREFIX/include/iregi/cpave_reduce.mod
-        - test -f $PREFIX/include/iregi/csi_reduce.mod
-        - test -f $PREFIX/include/iregi/cti_reduce.mod
-        - test -f $PREFIX/include/iregi/funlib.mod
-        - test -f $PREFIX/include/iregi/global.mod
-        - test -f $PREFIX/include/iregi/gti_reduce.mod
-        - test -f $PREFIX/include/iregi/kinematics.mod
-        - test -f $PREFIX/include/iregi/linear_algebra.mod
-        - test -f $PREFIX/include/iregi/matrices.mod
-        - test -f $PREFIX/include/iregi/matrix_base.mod
-        - test -f $PREFIX/include/iregi/mis_warp.mod
-        - test -f $PREFIX/include/iregi/pave_reduce.mod
-        - test -f $PREFIX/include/iregi/si_reduce.mod
-        - test -f $PREFIX/include/iregi/special_fun.mod
-        - test -f $PREFIX/include/iregi/ti_reduce.mod
+    tests:
+      - script:
+          - test -f $PREFIX/lib/libiregi.a
+          - test -f $PREFIX/include/iregi/binary_tree.mod
+          - test -f $PREFIX/include/iregi/cmatrix_base.mod
+          - test -f $PREFIX/include/iregi/cpave_reduce.mod
+          - test -f $PREFIX/include/iregi/csi_reduce.mod
+          - test -f $PREFIX/include/iregi/cti_reduce.mod
+          - test -f $PREFIX/include/iregi/funlib.mod
+          - test -f $PREFIX/include/iregi/global.mod
+          - test -f $PREFIX/include/iregi/gti_reduce.mod
+          - test -f $PREFIX/include/iregi/kinematics.mod
+          - test -f $PREFIX/include/iregi/linear_algebra.mod
+          - test -f $PREFIX/include/iregi/matrices.mod
+          - test -f $PREFIX/include/iregi/matrix_base.mod
+          - test -f $PREFIX/include/iregi/mis_warp.mod
+          - test -f $PREFIX/include/iregi/pave_reduce.mod
+          - test -f $PREFIX/include/iregi/si_reduce.mod
+          - test -f $PREFIX/include/iregi/special_fun.mod
+          - test -f $PREFIX/include/iregi/ti_reduce.mod
 
 about:
-  home: https://github.com/mg5amcnlo/mg5amcnlo/tree/3.x/vendor/IREGI/src
-  summary: 'IREGI: one-loop tensor Integral REduction with General propagator Indices'
+  summary: "IREGI: one-loop tensor Integral REduction with General propagator Indices"
   description: |
     IREGI is a package for one-loop tensor Integral REduction with General
     propagator Indices.
@@ -89,9 +87,9 @@ about:
   # IREGI source only exists in the MG5_aMC@NLO repo and so has the same license
   # modified University of Illinois/NCSA license
   license: LicenseRef-NCSA
-  license_family: OTHER
   license_file: LICENSE
-  dev_url: https://github.com/mg5amcnlo/mg5amcnlo/tree/3.x/vendor/IREGI/src
+  homepage: https://github.com/mg5amcnlo/mg5amcnlo/tree/3.x/vendor/IREGI/src
+  repository: https://github.com/mg5amcnlo/mg5amcnlo/tree/3.x/vendor/IREGI/src
 
 extra:
   feedstock-name: iregi
